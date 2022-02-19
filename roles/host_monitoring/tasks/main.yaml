@@ -1,0 +1,34 @@
+---
+
+  - name: Create Monitoring Directory
+    file:
+      path: "{{ application_path }}/monitoring/"
+      state: directory
+
+  - name: Copy Docker Compose
+    copy:
+      src: docker-compose.yml
+      dest: "{{ application_path }}/monitoring/"
+
+  - name: Run `docker-compose up`
+    shell:
+      cmd: "docker-compose -f docker-compose.yml up -d"
+      chdir: "{{ application_path }}/monitoring/"
+
+  # Firewall
+  - name: Add Firewall Rules for Monitoring Host
+    ufw:
+      rule: allow 
+      port: "{{ item }}"
+      from_ip: "{{ monitoring_node_ip }}"
+      proto: any
+      route: yes
+    with_items:
+      - "8080" # CAdvisor
+      - "9100" # Node Exporter
+    when: firewall_enabled == true
+      
+  - name: Reload Firewall
+    ufw:
+      state: reloaded
+    when: firewall_enabled == true

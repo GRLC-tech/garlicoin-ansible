@@ -1,0 +1,23 @@
+---
+
+  - name: Setup Mainnet Node
+    include: node.yml
+    vars:
+      role: "mainnet"
+      app_path: "{{ application_path }}/garlicoin"
+      storage_path: "{{ data_path }}/garlicoin"
+      rpc_port: "{{ mainnet_rpc_port }}"
+      node_port: "{{ mainnet_node_port }}"
+      monitor_port: "{{ mainnet_monitor_port }}"
+    when: mainnet_node == true
+
+  - name: Setup Testnet Node
+    include: node.yml
+    vars:
+      role: "testnet"
+      app_path: "{{ application_path }}/testnet-garlicoin"
+      storage_path: "{{ data_path }}/testnet-garlicoin"
+      rpc_port: "{{ testnet_rpc_port }}"
+      node_port: "{{ testnet_node_port }}"
+      monitor_port: "{{ testnet_monitor_port }}"
+    when: testnet_node == true

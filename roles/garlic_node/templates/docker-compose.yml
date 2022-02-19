@@ -1,0 +1,30 @@
+version: "3.9"
+services:
+
+  {{ role }}-garlicoin:
+    container_name: {{ role }}-garlicoin
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - {{ rpc_port }}:42068
+      - {{ node_port }}:42069
+    volumes:
+      - {{ data_path }}/:/data/
+      - {{ app_path }}/startup.sh:/root/startup.sh
+      - {{ app_path }}/garlicoin.conf:/root/garlicoin.conf
+    restart: always
+    
+  {{ role }}-garlicoin-exporter:
+    image: xhissy/garlicoind-exporter
+    container_name: {{ role }}-garlicoin-exporter
+    ports:
+      - {{ monitor_port }}:9439
+    environment:
+      - rpchost={{ role }}-garlicoin
+      - rpcuser={{ rpc_username }}
+      - rpcpassword={{ rpc_password }}
+      - rpcport={{ rpc_port }}
+    links:
+      - {{ role }}-garlicoin
+    restart: always

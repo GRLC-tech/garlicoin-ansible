@@ -1,0 +1,23 @@
+---
+
+# Directory Path for Config and DockerFile deployments
+application_path: /var/apps
+data_path: /data
+
+# Mainnet Node
+mainnet_node: true
+mainnet_rpc_port: 42068
+mainnet_node_port: 42069
+mainnet_monitor_port: 9439
+
+# Testnet Node
+testnet_node: false
+testnet_rpc_port: 42070
+testnet_node_port: 42075
+testnet_monitor_port: 9440
+
+# Firewall
+firewall_enabled: true
+
+# Monitoring
+monitoring_node_ip: 127.0.0.1

@@ -1,0 +1,69 @@
+---
+
+  # Directory Structure
+  - name: Create Directories
+    file:
+      path: "{{ item }}"
+      state: directory
+      owner: ubuntu
+      group: ubuntu
+    with_items:
+      - "{{ app_path }}"
+      - "{{ storage_path }}"
+
+  # Credentials
+  - name: Generate RPC Credentials
+    set_fact:
+      rpc_username: "{{ lookup('password', '/dev/null chars=ascii_letters,digits length=24 seed={{ role }}-{{ inventory_hostname }}') }}"
+      rpc_password: "{{ lookup('password', '/dev/null chars=ascii_letters,digits length=48 seed={{ role }}-{{ inventory_hostname }}') }}"
+
+  # Templating
+  - name: Copy File to Host
+    template:
+      src: "{{ role_path }}/templates/{{ item }}"
+      dest: "{{ app_path }}/"
+      mode: '0755'
+    with_items:
+      - "garlicoin.conf"
+      - "startup.sh"
+      - "docker-compose.yml"
+      - "Dockerfile"
+
+  # Docker Compose
+  - name: Docker Compose Build
+    shell:
+      cmd: "docker-compose -f docker-compose.yml build"
+      chdir: "{{ app_path }}"
+
+  - name: Docker Compose Run
+    shell:
+      cmd: "docker-compose -f docker-compose.yml up -d"
+      chdir: "{{ app_path }}"
+      
+  # Firewall
+  - name: Add Firewall Rules for Node
+    ufw:
+      rule: allow 
+      port: "{{ node_port }}"
+      from_ip: "0.0.0.0/0"
+      proto: any
+      route: yes
+    when: firewall_enabled == true
+
+  - name: Add Firewall Rules for Monitoring Host
+    ufw:
+      rule: allow 
+      port: "{{ item }}"
+      from_ip: "{{ monitoring_node_ip }}"
+      proto: any
+      route: yes
+    with_items:
+      - "{{ rpc_port }}"
+      - "{{ node_port }}"
+      - "{{ monitor_port }}"
+    when: firewall_enabled == true
+      
+  - name: Reload Firewall
+    ufw:
+      state: reloaded
+    when: firewall_enabled == true

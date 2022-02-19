@@ -1,0 +1,43 @@
+---
+
+  - name: Install prerequisites
+    apt:
+      update_cache: yes
+      name:
+        - ca-certificates
+        - curl
+        - gnupg
+        - lsb-release
+      state: present
+
+  - name: Add Docker GPG Key
+    apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      keyring: /usr/share/keyrings/docker-archive-keyring.gpg
+      state: present
+
+  - name: Copy Apt Source File
+    copy:
+      src: "{{ role_path }}/files/docker.list"
+      dest: /etc/apt/sources.list.d/docker.list
+ 
+  - name: Install Docker
+    apt:
+      update_cache: yes
+      name:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+      state: present
+
+  - name: Download Docker Compose
+    get_url:
+      url: https://github.com/docker/compose/releases/download/v2.2.3/docker-compose-linux-x86_64
+      dest: /usr/local/bin/docker-compose
+      mode: '0755'
+
+  - name: Enable Docker Service
+    service:
+      name: docker
+      state: started
+      enabled: yes
