@@ -2,8 +2,8 @@
   become: true
 
   roles:
-    #- patching
-    #- docker_install
-    #- configure_firewall
+    - patching
+    - docker_install
+    - configure_firewall
     - garlic_node
     - host_monitoring
