@@ -10,7 +10,7 @@ services:
       - {{ rpc_port }}:42068
       - {{ node_port }}:42069
     volumes:
-      - {{ data_path }}/:/data/
+      - {{ storage_path }}/:/data/
       - {{ app_path }}/startup.sh:/root/startup.sh
       - {{ app_path }}/garlicoin.conf:/root/garlicoin.conf
     restart: always
