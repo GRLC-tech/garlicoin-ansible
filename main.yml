@@ -3,7 +3,9 @@
 
   roles:
     - patching
+    - swap
     - docker_install
     - configure_firewall
     - garlic_node
+    - electrumx
     - host_monitoring
