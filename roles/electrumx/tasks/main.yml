@@ -1,97 +1,97 @@
 ---
  
-  - name: Install aptitude using apt
-    apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
+    - name: Install aptitude using apt
+      apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
 
-  - name: Install prerequisites
-    apt:
-      update_cache: yes
-      name:
-        - ca-certificates
-        - curl
-        - gnupg
-        - lsb-release
-        - apt-transport-https
-        - software-properties-common
-        - python3-pip
-        - virtualenv
-        - python3-setuptools
-      state: present
+    - name: Install prerequisites
+      apt:
+        update_cache: yes
+        name:
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - apt-transport-https
+          - software-properties-common
+          - python3-pip
+          - virtualenv
+          - python3-setuptools
+        state: present
 
-  - name: Install Docker Module for Python
-    pip:
-      name: docker
+    - name: Install Docker Module for Python
+      pip:
+        name: docker
 
-  - name: Copy Dockerfile
-    copy:
-      src: files/Dockerfile
-      dest: /var/apps/electrumx-node/  
-  
+  # Directory Structure
+    - name: Create Directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+      with_items:
+        - "{{ application_path }}/electrumx-node"
+        - "{{ application_path }}/electrumx-node/bin"
+
+  # Clone ElectrumX
+    - name: Clone a github repository
+      git:
+        repo: https://github.com/garlicoin-project/electrumx.git
+        dest: "{{ application_path }}/electrumx-node/electrumx"
+        clone: yes
+        update: yes
+
+
   # Transfer Files
-  - name: Copy File to Host
-    template:
-      src: "{{ role_path }}/{{ item }}"
-      dest: "{{ app_path }}/"
-      mode: '0755'
-    with_items:
-      - "files/DockerFile"
-      - "files/docker-compose.yml"
+    - name: Copy Docker Files
+      template:
+        src: "{{ role_path }}/{{ item }}"
+        dest: "{{ application_path }}/electrumx-node"
+        mode: '0755'
+      with_items:
+        - "files/DockerFile"
+        - "files/docker-compose.yml"
+    
+    - name: Copy Init
+      template:
+        src: "{{ role_path }}/files/bin/{{ item }}"
+        dest: "{{ application_path }}/electrumx-node/bin"
+        mode: '0755'
+      with_items:
+        - "init"
+
+    - name: Transfer Certs
+      template:
+        src: "{{ role_path }}/certs/{{ item }}"
+        dest: /data/
+        mode: '0644'
+      with_items:
+        - "privkey.pem"
+        - "fullchain.pem"
 
  # Docker Compose
-   - name: Docker Compose Build
-     shell:
-       cmd: "docker-compose -f docker-compose.yml build"
-       chdir: "{{ app_path }}"
+   
+    - name: Docker Compose Build
+      shell:
+        cmd: "docker-compose -f docker-compose.yml build"
+        chdir: "{{ application_path }}/electrumx-node"
 
-   - name: Docker Compose Up
-     shell:
-       cmd: "docker-compose -f docker-compose.yml up -d"
-       chdir: "{{ app_path }}"  
+    - name: Docker Compose Up      
+      shell:
+        cmd: "docker-compose -f docker-compose.yml up -d"
+        chdir: "{{ application_path }}/electrumx-node"  
 
-   - name: Transfer Certs
-     cert:
-       src: "{{ role_path }}/certs/{{ item }}
-       dest: /data/
-       mode: '0644'
-     with items:
-       - "privekey.pem"
-       - "fullchain.pem"
-
-   - name: Pull ElectrumX image
-     docker_image:
-       name: "{{ electrumx_image }}"
-       source: pull
-       
   # Docker Compose
-  - name: Docker Compose Build
-    shell:
-      cmd: "docker-compose -f docker-compose.yml build"
-      chdir: "{{ app_path }}"
+    - name: Add Firewall Rules for ElectrumX Node
+      ufw:
+        rule: allow
+        port: 50002
+        from_ip: "0.0.0.0/0"
+        proto: tcp
+        route: yes
+      when: firewall_enabled == true
 
-  - name: Docker Compose Up
-    shell:
-      cmd: "docker-compose -f docker-compose.yml up -d"
-      chdir: "{{ app_path }}"
-
-       - electrumx_data:/data
-       ports:
-       - "50002:50002"
-       env:
-         COIN: garlicoin
-         DAEMON_URL: "http://{{ rpc_username }}:{{ rpc_password }}@garlicoin:42068"
-         RPC_HOST: "127.0.0.1"
-         RPC_PORT: "8000"
-
-   - name: Add Firewall Rules for ElectrumX Node
-     ufw:
-       rule: allow
-       port: 50002
-       from_ip: "0.0.0.0/0"
-       proto: tcp
-       route: yes
-     when: firewall_enabled == true
-
-   - name: Reload Firewall
-     ufw:
-       state: reloaded
+    - name: Reload Firewall
+      ufw:
+        state: reloaded
       when: firewall_enabled == true

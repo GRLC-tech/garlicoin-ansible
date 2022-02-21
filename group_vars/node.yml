@@ -28,4 +28,4 @@ garlicoin_image:
 
 # Swap
 swap_file_path: /swapfile
-swap_file_size_mb: 2048
+swap_file_size_mb: 4096
