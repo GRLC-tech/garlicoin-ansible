@@ -26,44 +26,72 @@
     copy:
       src: files/Dockerfile
       dest: /var/apps/electrumx-node/  
-
-  - name: Node Config
-    copy:
-      src: "{{ role_path }}/certs/privkey.pem"
-      dest: /data/
-      mode: '0644'
-
-  - name: Pull ElectrumX image
-    docker_image:
-      name: "{{ electrumx_image }}"
-      source: pull
   
-  - name: Start ElectrumX
-    docker_container:
-      name: electrumx
-      image: "{{ electrumx_image }}"
-      restart_policy: unless-stopped
-      state: started
-      volumes:
-      - electrumx_data:/data
-      ports:
-      - "50002:50002"
-      env:
-        COIN: garlicoin
-        DAEMON_URL: "http://{{ rpc_username }}:{{ rpc_password }}@garlicoin:42068"
-        RPC_HOST: "127.0.0.1"
-        RPC_PORT: "8000"
+  # Transfer Files
+  - name: Copy File to Host
+    template:
+      src: "{{ role_path }}/{{ item }}"
+      dest: "{{ app_path }}/"
+      mode: '0755'
+    with_items:
+      - "files/DockerFile"
+      - "files/docker-compose.yml"
 
-  - name: Add Firewall Rules for ElectrumX Node
-    ufw:
-      rule: allow
-      port: 50002
-      from_ip: "0.0.0.0/0"
-      proto: tcp
-      route: yes
-    when: firewall_enabled == true
+ # Docker Compose
+   - name: Docker Compose Build
+     shell:
+       cmd: "docker-compose -f docker-compose.yml build"
+       chdir: "{{ app_path }}"
 
-  - name: Reload Firewall
-    ufw:
-      state: reloaded
-    when: firewall_enabled == true
+   - name: Docker Compose Up
+     shell:
+       cmd: "docker-compose -f docker-compose.yml up -d"
+       chdir: "{{ app_path }}"  
+
+   - name: Transfer Certs
+     cert:
+       src: "{{ role_path }}/certs/{{ item }}
+       dest: /data/
+       mode: '0644'
+     with items:
+       - "privekey.pem"
+       - "fullchain.pem"
+
+   - name: Pull ElectrumX image
+     docker_image:
+       name: "{{ electrumx_image }}"
+       source: pull
+       
+  # Docker Compose
+  - name: Docker Compose Build
+    shell:
+      cmd: "docker-compose -f docker-compose.yml build"
+      chdir: "{{ app_path }}"
+
+  - name: Docker Compose Up
+    shell:
+      cmd: "docker-compose -f docker-compose.yml up -d"
+      chdir: "{{ app_path }}"
+
+       - electrumx_data:/data
+       ports:
+       - "50002:50002"
+       env:
+         COIN: garlicoin
+         DAEMON_URL: "http://{{ rpc_username }}:{{ rpc_password }}@garlicoin:42068"
+         RPC_HOST: "127.0.0.1"
+         RPC_PORT: "8000"
+
+   - name: Add Firewall Rules for ElectrumX Node
+     ufw:
+       rule: allow
+       port: 50002
+       from_ip: "0.0.0.0/0"
+       proto: tcp
+       route: yes
+     when: firewall_enabled == true
+
+   - name: Reload Firewall
+     ufw:
+       state: reloaded
+      when: firewall_enabled == true

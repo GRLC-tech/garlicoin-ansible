@@ -1,0 +1,18 @@
+version: "3.9"
+services:
+
+   mainnet-garlicoin:
+    container_name: mainnet-garlicoin
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 50002:50002
+    volumes:
+      - /data/electrumx/:/data/
+    env:
+      COIN: garlicoin
+      DAEMON_URL: "http://{{ rpc_username }}:{{ rpc_password }}@garlicoin:42068"
+      RPC_HOST: "127.0.0.1"
+      RPC_PORT: "8000"
+    restart: always 
