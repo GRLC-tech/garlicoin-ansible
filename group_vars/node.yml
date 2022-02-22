@@ -11,7 +11,7 @@ mainnet_node_port: 42069
 mainnet_monitor_port: 9439
 
 # Testnet Node
-testnet_node: true
+testnet_node: false
 testnet_rpc_port: 42070
 testnet_node_port: 42075
 testnet_monitor_port: 9440
@@ -29,3 +29,10 @@ garlicoin_image:
 # Swap
 swap_file_path: /swapfile
 swap_file_size_mb: 4096
+
+# ElectrumX Certs
+private_key_filename: privkey.pem
+public_cert_filename: fullchain.pem
+
+# Donations
+donation_address: GfDRXaAyeXEoRvCPuoi38X21EDWNYvNhHR

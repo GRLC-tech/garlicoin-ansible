@@ -10,4 +10,7 @@ services:
       - 50002:50002
     volumes:
       - /data/electrumx/:/data/
+    links:
+      - mainnet-garlicoin
+    network_mode: host
     restart: always 

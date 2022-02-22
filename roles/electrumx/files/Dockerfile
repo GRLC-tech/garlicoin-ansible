@@ -1,37 +1,29 @@
+FROM ubuntu:22.04
+WORKDIR /root/
 
-FROM python:3.9-alpine
-LABEL maintainer "Ryan Shaw <ryan@rshaw.me>"
+# Install & Update
+RUN apt update -y \
+ && apt upgrade -y \
+ && apt install -y git \
+ && DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata \
+ && apt install -y software-properties-common \
+ && add-apt-repository ppa:deadsnakes/ppa \
+ && apt install -y python3 python3-aiohttp python3-pip net-tools \
+ && pip3 install pylru \
+ && pip3 install plyvel \
+ && pip3 install 'aiorpcx==0.5.6'
 
-WORKDIR /electrumx
+# Elextrum Server
+RUN git clone https://github.com/garlicoin-project/electrumx.git
+ADD coins.py /root/electrumx/lib/coins.py
+RUN cd /root/electrumx && python3 setup.py install
 
-COPY ./bin /usr/local/bin
-COPY ./electrumx/setup.py /electrumx/
-COPY ./electrumx/electrumx_* /electrumx/
+# Statups
+ADD startup.sh /root/startup.sh
+RUN chmod +x /root/startup.sh
 
-RUN chmod a+x /usr/local/bin/* && \
-    apk add --no-cache git build-base openssl && \
-    apk add --no-cache --repository http://nl.alpinelinux.org/alpine/edge/testing leveldb-dev && \
-    cd /electrumx && \
-    python setup.py install && \
-    apk del git build-base && \
-    rm -rf /tmp/*
+# Config
+ADD banner.txt /root/banner.txt
 
-COPY . /electrumx
-
-VOLUME ["/data"]
-ENV HOME /data
-ENV ALLOW_ROOT 1
-ENV DB_DIRECTORY /data
-ENV SSL_PORT=50002
-ENV SSL_CERTFILE ${DB_DIRECTORY}/fullchain.pem
-ENV SSL_KEYFILE ${DB_DIRECTORY}/privkey.pem
-ENV HOST ""
-ENV COIN garlicoin
-ENV DAEMON_URL "http://{{ rpc_username }}:{{ rpc_password }}@garlicoin:42068"
-ENV RPC_HOST "127.0.0.1"
-ENV RPC_PORT "8000"
-WORKDIR /data
-
-EXPOSE 50002
-
-CMD ["init"]
+# Entry
+CMD /root/startup.sh
