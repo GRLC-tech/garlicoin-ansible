@@ -1,2 +1,6 @@
 *.pem
 *.private
+
+*.crt
+
+*.key

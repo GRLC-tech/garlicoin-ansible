@@ -34,14 +34,13 @@
 
   # Transfer Files
     - name: Copy Docker Files
-      template:
+      copy:
         src: "{{ role_path }}/{{ item }}"
         dest: "{{ application_path }}/electrumx-node/"
         mode: '0755'
       with_items:
         - "files/DockerFile"
         - "files/docker-compose.yml"
-        - "files/banner.txt"
         - "files/coins.py"
         
     - name: Copy Startup.sh
@@ -53,13 +52,19 @@
         - "startup.sh"
 
     - name: Transfer Certs
-      template:
+      copy:
         src: "{{ role_path }}/certs/{{ item }}"
-        dest: /data/
+        dest: /data/electrumx/
         mode: '0644'
       with_items:
         - "{{ private_key_filename }}"
         - "{{ public_cert_filename }}"
+    
+    - name: Copy Banner
+      copy:
+        src: "{{ role_path }}/files/banner.txt"
+        dest: /data/electrumx
+        mode: 655
 
  # Docker Compose
    
