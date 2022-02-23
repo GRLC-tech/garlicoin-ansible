@@ -88,6 +88,14 @@
         route: yes
       when: firewall_enabled == true
 
+    - name: Add Firewall Rules for ElectrumX Node
+      ufw:
+        rule: allow
+        port: 50002
+        from_ip: "0.0.0.0/0"
+        proto: tcp
+      when: firewall_enabled == true
+
     - name: Reload Firewall
       ufw:
         state: reloaded

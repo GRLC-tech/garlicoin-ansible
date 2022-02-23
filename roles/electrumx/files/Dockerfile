@@ -22,8 +22,5 @@ RUN cd /root/electrumx && python3 setup.py install
 ADD startup.sh /root/startup.sh
 RUN chmod +x /root/startup.sh
 
-# Config
-ADD banner.txt /root/banner.txt
-
 # Entry
 CMD /root/startup.sh

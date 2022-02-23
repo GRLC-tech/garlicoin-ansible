@@ -1,0 +1,32 @@
+FROM debian:stretch-slim
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update -y
+RUN apt-get upgrade -y
+RUN apt-get install -y apt-utils
+RUN apt-get install -y git
+RUN apt-get install -y build-essential
+RUN apt-get install -y libboost-all-dev
+RUN apt-get install -y libssl-dev
+RUN apt-get install -y libcurl4-gnutls-dev
+RUN apt-get install -y libconfig++-dev
+WORKDIR /root
+
+
+RUN git clone https://github.com/garlico-in/garlicoin-seeder.git
+
+RUN cd ./garlicoin-seeder && make
+
+# Cleanup Build Packages
+RUN apt-get remove -y \
+  build-essential libboost-all-dev libssl-dev
+RUN apt-get autoremove -y
+
+EXPOSE 53
+
+ADD startup.sh /root/startup.sh
+RUN chmod +x /root/startup.sh
+
+ADD settings.conf /root/garlicoin-seeder/settings.conf
+
+CMD /root/startup.sh

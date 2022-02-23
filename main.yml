@@ -2,6 +2,7 @@
   become: true
 
   roles:
+    - hostname
     - patching
     - swap
     - docker_install
@@ -9,3 +10,4 @@
     - garlic_node
     - electrumx
     - host_monitoring
+    - seeder

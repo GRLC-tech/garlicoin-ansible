@@ -36,3 +36,6 @@ public_cert_filename: fullchain.pem
 
 # Donations
 donation_address: GfDRXaAyeXEoRvCPuoi38X21EDWNYvNhHR
+
+# Seeder
+dnsseed: dnsseed.garlicoin.network

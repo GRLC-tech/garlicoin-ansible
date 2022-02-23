@@ -1,2 +1,2 @@
 [node]
-example.host.name
+example.host.name namserver_vps=ns.example.host.name
