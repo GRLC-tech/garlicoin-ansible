@@ -1,25 +1,5 @@
 ---
  
-  # Dependencies
-    - name: Install Dependencies
-      apt:
-        pkg: 
-        - git
-        - software-properties-common
-        - build-essential
-        - libboost-all-dev
-        - libssl-dev
-        - libcurl4-openssl-dev
-        - libconfig++-dev
-        update_cache: yes
-
-  # Directory Structure
-    - name: Clone Seeder
-      git:
-        repo: https://github.com/team-exor/generic-seeder.git
-        dest: "{{ application_path }}/seeder"
-        clone: yes
-        update: no
 
   # Transfer Files
     - name: Copy Docker Files
@@ -35,7 +15,7 @@
       template:
         src: "{{ role_path }}/templates/{{ item }}"
         dest: "{{ application_path }}/seeder/"
-        mode: 655
+        mode: 755
       with_items:
         - "settings.conf"
         - "startup.sh"
