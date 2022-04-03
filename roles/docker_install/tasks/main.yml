@@ -22,13 +22,7 @@
       dest: /etc/apt/sources.list.d/docker.list
  
   - name: Install Docker
-    apt:
-      update_cache: yes
-      name:
-        - docker-ce
-        - docker-ce-cli
-        - containerd.io
-      state: present
+    ansible.builtin.shell: cd ~ && curl -fsSL https://get.docker.com -o get-docker.sh && sudo sh get-docker.sh
 
   - name: Download Docker Compose
     get_url:

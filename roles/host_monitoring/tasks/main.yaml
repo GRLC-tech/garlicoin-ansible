@@ -27,7 +27,11 @@
       - "8080" # CAdvisor
       - "9100" # Node Exporter
     when: firewall_enabled == true
-      
+
+  - name: Pause for iptables lock
+    pause:
+      seconds: 5
+
   - name: Reload Firewall
     ufw:
       state: reloaded

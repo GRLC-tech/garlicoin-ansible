@@ -1,0 +1,73 @@
+---
+ 
+
+  # Transfer Files
+    - name: Copy Docker Files
+      copy:
+        src: "{{ role_path }}/{{ item }}"
+        dest: "{{ application_path }}/seeder/"
+        mode: '0755'
+      with_items:
+        - "files/docker-compose.yml"
+        - "files/DockerFile"
+        
+    - name: Copy Templates
+      template:
+        src: "{{ role_path }}/templates/{{ item }}"
+        dest: "{{ application_path }}/seeder/"
+        mode: 755
+      with_items:
+        - "settings.conf"
+        - "startup.sh"
+
+    - name: Build the default target
+      make:
+        chdir: "{{ application_path }}/seeder"
+
+  # Docker Compose 
+    - name: Docker Compose Build
+      shell:
+        cmd: "docker-compose -f docker-compose.yml build"
+        chdir: "{{ application_path }}/seeder"
+
+    - name: Docker Compose Up      
+      shell:
+        cmd: "docker-compose -f docker-compose.yml up -d"
+        chdir: "{{ application_path }}/seeder"  
+
+  # Firewall
+    - name: Add Firewall Rules for DNS Seeder Node
+      ufw:
+        rule: allow
+        port: 53
+        from_ip: "0.0.0.0/0"
+        route: yes
+      when: firewall_enabled == true
+
+  # Firewall
+    - name: Add Firewall Rules for DNS Seeder Node
+      ufw:
+        rule: allow
+        port: 53
+        from_ip: "::/0"
+        route: yes
+      when: firewall_enabled == true
+
+    - name: Add Firewall Rules for DNS Seeder Node
+      ufw:
+        rule: allow
+        port: 53
+        from_ip: "0.0.0.0/0"
+      when: firewall_enabled == true
+
+    - name: Add Firewall Rules for DNS Seeder Node
+      ufw:
+        rule: allow
+        port: 53
+        from_ip: "::/0"
+      when: firewall_enabled == true
+
+    - name: Reload Firewall
+      ufw:
+        state: reloaded
+      when: firewall_enabled == true

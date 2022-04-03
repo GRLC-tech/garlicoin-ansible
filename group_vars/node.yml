@@ -21,3 +21,21 @@ firewall_enabled: true
 
 # Monitoring
 monitoring_node_ip: 127.0.0.1
+
+# Images
+electrumx_image: ryanshaw/docker-electrumx:latest
+garlicoin_image:
+
+# Swap
+swap_file_path: /swapfile
+swap_file_size_mb: 4096
+
+# ElectrumX Certs
+private_key_filename: privkey.pem
+public_cert_filename: fullchain.pem
+
+# Donations
+donation_address: GfDRXaAyeXEoRvCPuoi38X21EDWNYvNhHR
+
+# Seeder
+dnsseed: dnsseed.garlicoin.network
